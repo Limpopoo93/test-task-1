@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <title>List</title>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
+</head>
+<body id="body">
+  <div class="search-conteiner">
+    <form>
+      <input type="text" id="filter-input" placeholder="Search here...">
+      <button type="button" onclick="filterContent()" ></button>
+    </form>
+  </div>
+
+    <div class="conteiner" id="conteiner"></div>
+</body>
+</html>
+
+<script type="text/javascript">
+  const requestURL = 'https://jsonplaceholder.typicode.com/posts/?_start=0&_limit=7';
+
+  function sendHttpRequest() {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', requestURL);
+      xhr.responseType = 'json';
+      xhr.onload = () => {
+        resolve(xhr.response);
+      }
+      xhr.send();
+    });
+  }
+
+  function elementListCreated(data) {
+    data.forEach(item => {
+      const conteiner = document.getElementById('conteiner');
+      const container = document.createElement('div');
+      container.classList.add('container');
+      container.id = `${item.title}`;
+      container.innerHTML = `
+        <div class="content-border" id="content-border">
+          <div class="content-header" id="content-header">
+            <strong id="header-value">${item.title}</strong>
+          </div>
+          <div class="content" id="content">
+            ${item.body}
+          </div>
+          <div id="checkbox-content" class="checkbox-content">
+            <input id="${item.title}" onclick="checksbox(this)" class="check-box-input" type="checkbox">
+          </div>
+        </div>
+      `;
+
+      conteiner.appendChild(container);
+    })
+  }
+
+  sendHttpRequest().then(data => elementListCreated(data));
+
+  function filterContent() {
+    let input = document.getElementById('filter-input').value,
+      filterElements = document.querySelectorAll('#content-header strong');
+
+  const url = new URL(window.location);
+  url.searchParams.set('search', input);
+  window.history.pushState({}, '', url);
+
+    let contentFilter = document.getElementById('content-border');
+    filterElements.forEach(item => {
+      if (item.innerHTML.toLowerCase().includes(input)) {
+        document.getElementById(item.innerHTML).style.display = 'block';
+      } else {
+        document.getElementById(item.innerHTML).style.display = 'none';
+      }
+    });
+
+  }
+
+  function checksbox(title) {
+    const contentCover = document.getElementById(title.id);
+    const contentBorder = contentCover.querySelector(".content-border");
+    if (title.checked) {
+      contentBorder.style.backgroundColor = "cadetblue";
+      contentBorder.style.color = "white";
+    } else {
+      contentBorder.style.backgroundColor = "blanchedalmond";
+      contentBorder.style.color = "black";
+    }
+  }
+
+</script>
